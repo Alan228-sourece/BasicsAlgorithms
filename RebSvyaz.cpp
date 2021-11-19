@@ -1,0 +1,161 @@
+﻿// RebSvyaz.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <vector>
+#include <queue>
+#include <stack>
+using namespace std;
+void condens(vector<vector<int>>& g, int n, vector<int>& real, int v, int& minD) {
+	vector<int> a;
+	vector<int>used(n + 10, 0);
+	vector<int>out(n + 10, 0);
+	vector<int>in(n + 10, 0);
+	vector<int>inset(n + 10, 0);
+	inset[v] = 1;
+	for (int i = 0; i < g[v].size(); i++)
+	{
+		int s = g[v][i];
+		if (real[s] == 1) {
+			a.push_back(s);
+			in[s]++;
+			inset[s] = 1;
+
+		}
+
+	}
+	int assize = a.size();
+	for (int i = 0; i < assize; i++)
+	{
+		int f = a[i];
+		for (int d = 0; d < g[f].size(); d++)
+		{
+			int s = g[f][d];
+			if (real[s] == 1&&inset[s]==0) {
+				in[s]++;
+				inset[s] = 1;
+				a.push_back(s);
+
+			}
+		}
+	}
+	stack <int> b;
+	for (int i = a.size() - 1; i >= 0; i--)
+	{
+		int f = a[i];
+		b.push(f);
+		for (int d = 0; d < g[f].size(); d++)
+		{
+			int s = g[f][d];
+			if (real[s] == 1) {
+				if (inset[s] == 1) {
+
+				}
+				else {
+					out[f]++;
+				}
+			}
+
+		}
+
+	}int bsz = b.size();
+	for (int i = bsz - 1; i >= 0; i--)
+	{
+		int f = b.top(); b.pop();
+		if (real[f] == 1 && out[f] <= in[f] && inset[f] == 1) {
+
+
+		}
+		else {
+			used[f] = 1;
+			if (inset[f] == 1) {
+
+				out[f] = 1000000;
+				in[f] = 0;
+				inset[f] = 0;
+				for (int d = 0; d < g[f].size(); d++)
+				{
+					int s = g[f][d];
+					if (real[s] == 1) {
+						in[s]--;
+						if (out[s] > in[s]) {
+							if (used[s] == 0) {
+								b.push(f);
+							}
+						}
+
+					}
+
+				}
+			}
+
+
+		}
+
+
+	}
+	stack <int>ost;
+	for (int i = 0; i < n; i++)
+	{
+		if (inset[i] == 1) {
+			real[i] = 0;
+			ost.push(i);
+		}
+	}
+	int ostsz = ost.size();
+	vector<int>reb;
+	for (int i = 0; i < ostsz; i++)
+	{
+		int f = ost.top();
+		ost.pop();
+		for (int d = 0; d < g[f].size(); d++)
+		{
+			if (inset[g[f][d]] == 0 && real[g[f][d]] == 1) {
+				reb.push_back(g[f][d]);
+			}
+		}
+	}
+	g[v] = reb;
+	int rebs = reb.size();
+	if (rebs != 0) {
+		minD = min(rebs, minD);
+	}
+}
+int main()
+{
+	int minD=100000000;
+	int n;
+	cin >> n;
+	int m; cin >> m;
+	vector<vector<int>>g(n+1);
+	vector<int>real(n + 1,1);
+	for (int i = 0; i < m; i++)
+	{
+		int f, s;
+		cin >> f >> s;
+		f--; s--;
+		g[f].push_back(s);
+		g[s].push_back(f);
+	}
+	for (int i = 0; i < n; i++)
+	{
+		int gs = g[i].size();
+		if (gs != 0) {
+			minD = min(minD, gs);
+		}
+	}
+	for (int i = 0; i < n; i++)
+	{
+		for (int d = 0; d < n; d++)
+		{
+			if (real[d] == 1) {
+				condens(g, n, real, d, minD);
+			}
+		}
+	}
+	cout << minD;
+}
+
+ 
